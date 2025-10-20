@@ -328,5 +328,7 @@ def logout():
     return redirect(url_for('index'))
 
 # ---------- Run ----------
-if __name__ == '__main__':
-    app.run(debug=True)
+def handler(request, *args, **kwargs):
+    return app(request.environ, request.start_response)
+
+
