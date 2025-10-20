@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <title>Tài liệu học tập</title>
+
+    <!-- Bootstrap + Icons + Font -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+
+    <style>
+        :root{
+            --primary:#4361ee;
+            --secondary:#3a0ca3;
+            --accent:#4cc9f0;
+            --glass: rgba(255,255,255,0.9);
+        }
+        body{
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(1200px 600px at 10% 10%, rgba(76,201,240,0.12), transparent),
+                        radial-gradient(1000px 500px at 90% 90%, rgba(67,97,238,0.12), transparent),
+                        linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+            min-height:100vh;
+            color:#222;
+        }
+        .glass-card{
+            background: var(--glass);
+            backdrop-filter: blur(8px);
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.3);
+            box-shadow: 0 8px 30px rgba(31, 38, 135, 0.08);
+        }
+        .navbar { background: transparent; padding: 1rem 0; }
+        .navbar-brand { font-weight:700; color: white; font-size:1.35rem; }
+        .hero { margin-top: 1.5rem; padding: 2.2rem; border-radius: 18px; color: white; border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 8px 30px rgba(0,0,0,0.12); }
+        .badge-custom { background: linear-gradient(45deg,var(--primary),var(--accent)); color: white; padding: .45rem .9rem; border-radius: 30px; font-size: .9rem; display:inline-flex; align-items:center; gap:.5rem; }
+        .category-btn {
+            border-radius: 999px; padding: .45rem .9rem; margin: .25rem; color: white; text-decoration:none;
+            background: rgba(255,255,255,0.08); display:inline-block;
+            transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+        }
+        .category-btn.active { transform: translateY(-6px) scale(1.03); background: linear-gradient(45deg,var(--accent),var(--primary)); box-shadow: 0 8px 20px rgba(67,97,238,0.18); color: #fff; }
+        .search-input { border-radius: 30px; padding: .6rem 1rem; border: none; box-shadow: 0 6px 18px rgba(12,12,40,0.08); width:100%; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.25rem; margin-top: 1.25rem; }
+        .doc-card { background: white; border-radius: 14px; padding: 1.25rem; transition: transform .25s, box-shadow .25s; display:flex; flex-direction:column; min-height:180px; }
+        .doc-card:hover { transform: translateY(-10px); box-shadow: 0 18px 40px rgba(40,50,120,0.12); }
+        .doc-head { display:flex; gap:.75rem; align-items:center; margin-bottom:.6rem; }
+        .doc-icon { width:52px; height:52px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.6rem; background: linear-gradient(135deg,#eef2ff,#dde7ff); color: var(--primary); flex-shrink:0; }
+        .doc-title { font-weight:700; font-size:1.05rem; margin:0; }
+        .doc-meta { color: #6b7280; font-size:.9rem; margin-top:.45rem; margin-bottom:.8rem; }
+        .doc-actions { margin-top:auto; display:flex; gap:.6rem; }
+        .btn-modern { background: linear-gradient(45deg,var(--primary),var(--secondary)); border:none; color:white; padding:.55rem .9rem; border-radius:10px; display:inline-flex; align-items:center; gap:.5rem; }
+        .btn-outline-modern { border:1px solid rgba(67,97,238,0.12); background:transparent; color:#333; padding:.5rem .9rem; border-radius:10px; }
+        .cat-badge { padding:.25rem .6rem; border-radius:999px; font-size:.78rem; font-weight:600; background: linear-gradient(90deg, rgba(67,97,238,0.12), rgba(76,201,240,0.08)); color: #24303f; }
+        .empty-state { text-align:center; color: rgba(255,255,255,0.9); padding: 3rem 0; }
+        .modal-content { border-radius: 14px; }
+        @media (max-width:576px){ .hero { padding:1.2rem; } .navbar-brand { font-size:1.1rem; } }
+    </style>
+</head>
+<body>
+    <!-- NAV -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-journal-bookmark-fill me-2"></i> Tài liệu học tập
+            </a>
+
+            <div class="d-flex align-items-center ms-auto gap-2">
+                {% if not session.logged_in %}
+                <button class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#loginModal">
+                    <i class="bi bi-key me-1"></i> Đăng nhập Admin
+                </button>
+                {% else %}
+                <div class="d-flex align-items-center text-white me-2">
+                    <i class="bi bi-person-circle me-2"></i> Team_Kn1
+                </div>
+                <a href="/admin" class="btn btn-light me-2">
+                    <i class="bi bi-speedometer2 me-1"></i> Quản lý
+                </a>
+                <a href="/logout" class="btn btn-outline-light">
+                    <i class="bi bi-box-arrow-right me-1"></i> Đăng xuất
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Login modal -->
+    <div class="modal fade" id="loginModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content glass-card p-3">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title">Đăng nhập Admin</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" action="/login">
+                        <div class="mb-3">
+                            <label class="form-label">Mật khẩu:</label>
+                            <input type="password" class="form-control" name="password" required placeholder="Nhập mật khẩu admin">
+                        </div>
+                        <button type="submit" class="btn btn-modern w-100">
+                            <i class="bi bi-key me-1"></i> Đăng nhập
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="container my-4">
+        <div class="hero glass-card p-4">
+            <div class="d-flex flex-column flex-md-row align-items-start gap-3">
+                <div class="flex-fill">
+                    <h1 class="display-6 fw-bold mb-1">Tổng hợp tài liệu học tập</h1>
+                    <p class="mb-2">Chọn chuyên mục hoặc tìm kiếm để lọc nhanh tài liệu.</p>
+
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <span class="badge-custom"><i class="bi bi-file-earmark-text"></i> {{ public_docs|length }} công khai</span>
+                        <span class="badge-custom"><i class="bi bi-lock"></i> {{ private_docs|length }} mật</span>
+                    </div>
+                </div>
+
+                <div style="min-width:280px;">
+                    <input id="searchInput" class="search-input" placeholder="Tìm theo tiêu đề (ví dụ: Đại số)...">
+                </div>
+            </div>
+
+            <!-- categories nav (link to subject pages) -->
+            <div class="mt-3">
+                {% set categories = ['Tất cả','Toán','Lý','Hóa','Sinh','Tin','Sử','Văn','Tiếng Anh'] %}
+                <div id="categories" class="mt-2">
+                    {% for c in categories %}
+                        {% if c == 'Tất cả' %}
+                            <a href="{{ url_for('index') }}" class="category-btn {% if not current_subject or current_subject == 'Tất cả' %}active{% endif %}" data-cat="{{ c }}">{{ c }}</a>
+                        {% else %}
+                            <a href="{{ url_for('subject', name=c) }}" class="category-btn {% if current_subject == c %}active{% endif %}" data-cat="{{ c }}">{{ c }}</a>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="mt-3">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show glass-card">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Documents grid -->
+        <h3 class="text-white mt-4 mb-3 section-title">Tài liệu</h3>
+
+        <div id="docsGrid" class="grid">
+            {% for doc in public_docs %}
+            <article class="doc-card" data-title="{{ doc.title|lower }}" data-cat="{{ doc.category|default('Chung') }}">
+                <div class="doc-head">
+                    <div class="doc-icon"><i class="bi bi-file-earmark-text"></i></div>
+                    <div class="flex-fill text-start">
+                        <h4 class="doc-title">{{ doc.title }}</h4>
+                        <div class="doc-meta">
+                            <span class="cat-badge">{{ doc.category|default('Chung') }}</span>
+                            &nbsp;&middot;&nbsp;
+                            <small>{{ doc.created_at|default('—') }}</small>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="text-muted small mb-3">{{ doc.url }}</p>
+
+                <div class="doc-actions">
+                    <a class="btn-modern" href="{{ doc.url }}" target="_blank"><i class="bi bi-eye"></i> Xem</a>
+                    <button class="btn-outline-modern" onclick="copyLink('{{ doc.url }}')"><i class="bi bi-clipboard"></i> Sao chép</button>
+                    <a class="btn-outline-modern" href="?q={{ doc.title }}" style="margin-left:auto"><i class="bi bi-search"></i> Tìm</a>
+                </div>
+            </article>
+            {% endfor %}
+
+            <!-- private docs shown as locked cards -->
+            {% for doc in private_docs %}
+            <article class="doc-card" data-title="{{ doc.title|lower }}" data-cat="{{ doc.category|default('Chung') }}">
+                <div class="doc-head">
+                    <div class="doc-icon"><i class="bi bi-lock-fill"></i></div>
+                    <div class="flex-fill text-start">
+                        <h4 class="doc-title">{{ doc.title }}</h4>
+                        <div class="doc-meta">
+                            <span class="cat-badge">{{ doc.category|default('Chung') }}</span>
+                            &nbsp;&middot;&nbsp;
+                            <small>{{ doc.created_at|default('—') }}</small>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="text-muted small mb-3">Tài liệu mật — yêu cầu key để truy cập</p>
+
+                <div class="doc-actions">
+                    <button class="btn-modern" data-bs-toggle="modal" data-bs-target="#keyModal{{ doc.id }}"><i class="bi bi-key"></i> Nhập Key</button>
+                    <button class="btn-outline-modern" onclick="copyKeyFromBadge('{{ doc.key|default('') }}')"><i class="bi bi-clipboard"></i> Sao chép key (admin)</button>
+                </div>
+            </article>
+
+            <!-- key modal -->
+            <div class="modal fade" id="keyModal{{ doc.id }}" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content glass-card p-3">
+                        <div class="modal-header border-0">
+                            <h5 class="modal-title">Nhập Key - {{ doc.title }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form method="POST" action="/access_private/{{ doc.id }}">
+                                <div class="mb-3">
+                                    <input name="key" class="form-control key-input" placeholder="Nhập key (kn1-...)" required>
+                                </div>
+                                <button class="btn btn-modern w-100"><i class="bi bi-unlock"></i> Truy cập</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+            {% if (public_docs|length + private_docs|length) == 0 %}
+                <div class="empty-state col-12">
+                    <i class="bi bi-inbox display-1 text-white opacity-50"></i>
+                    <h3 class="text-white mt-3">Chưa có tài liệu nào</h3>
+                    <p class="text-white-50">Admin sẽ thêm tài liệu sớm.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- floating admin -->
+    {% if session.logged_in %}
+    <a href="/admin" class="btn btn-modern" style="position:fixed; right:1.4rem; bottom:1.4rem; border-radius: 12px; padding:.7rem 1rem;">
+        <i class="bi bi-speedometer2 me-2"></i> Quản lý
+    </a>
+    {% endif %}
+
+    <footer class="text-center text-white mt-5 py-4">
+        <div class="container">
+            <p>&copy; Edit by huankn1</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Client searching (works together with server-side category pages)
+        const docs = Array.from(document.querySelectorAll('#docsGrid .doc-card'));
+        const searchInput = document.getElementById('searchInput');
+
+        function applyFilter() {
+            const q = (searchInput.value || '').trim().toLowerCase();
+            docs.forEach(card => {
+                const title = card.dataset.title || '';
+                const match = title.includes(q);
+                card.style.display = match ? '' : 'none';
+            });
+        }
+
+        searchInput.addEventListener('input', applyFilter);
+
+        function copyLink(url){
+            navigator.clipboard?.writeText(url).then(()=> alert('Đã sao chép link vào clipboard')).catch(()=> alert('Không thể sao chép'));
+        }
+        function copyKeyFromBadge(key){
+            if(!key){ alert('Không có key hiển thị (chỉ admin mới thấy khi xem quản lý).'); return; }
+            navigator.clipboard?.writeText(key).then(()=> alert('Đã sao chép key'));
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <title>Quản trị - Tài liệu học tập</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+
+    <style>
+        :root{ --primary:#4361ee; --secondary:#3a0ca3; --accent:#4cc9f0; }
+        body { font-family:'Inter',sans-serif; background: linear-gradient(135deg,#667eea 0%,#764ba2 100%); color:#222; min-height:100vh; }
+        .glass-card { background: rgba(255,255,255,0.95); backdrop-filter: blur(8px); border-radius:14px; border:1px solid rgba(255,255,255,0.2); }
+        .navbar { background: transparent; padding:1rem 0; }
+        .navbar-brand { color: white; font-weight:700; }
+        .admin-panel { margin:2rem 0; padding:1.25rem; border-radius:12px; }
+        .form-control, .form-select { border-radius:10px; padding:.65rem 1rem; border:1px solid #e9ecef; }
+        .btn-modern { background: linear-gradient(45deg,var(--primary),var(--secondary)); color:white; border:none; border-radius:10px; padding:.6rem 1.1rem; }
+        .stats-card { background: linear-gradient(135deg,var(--primary),var(--accent)); color:white; border-radius:12px; padding:1rem; text-align:center; }
+        .doc-card { border-radius:12px; overflow:hidden; margin-bottom:1rem; box-shadow: 0 8px 30px rgba(0,0,0,0.08); }
+        .doc-card .card-body { display:flex; gap:1rem; align-items:center; justify-content:space-between; }
+        .cat-select { border-radius:999px; padding:.45rem .7rem; }
+        .key-badge { background: linear-gradient(90deg,#ffb703,#ff6b00); color:white; padding:.35rem .6rem; border-radius:8px; font-family: monospace; }
+        .search-filter { margin-bottom:1rem; display:flex; gap:.6rem; align-items:center; }
+        .subject-list { display:flex; gap:.5rem; flex-wrap:wrap; margin-bottom:1rem; }
+        .subject-link { padding:.45rem .8rem; border-radius:999px; background: rgba(255,255,255,0.08); color:white; text-decoration:none; }
+        .subject-link.active { background: linear-gradient(45deg,var(--accent),var(--primary)); transform:translateY(-4px); }
+        @media (max-width:576px){ .search-filter{ flex-direction:column; align-items:stretch; } }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a class="navbar-brand" href="/"> <i class="bi bi-journal-bookmark-fill me-2"></i> Tài liệu học tập</a>
+            <div class="ms-auto">
+                <a class="btn btn-outline-light" href="/logout"><i class="bi bi-box-arrow-right me-1"></i> Đăng xuất</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row mt-3">
+            <div class="col-md-3 mb-3">
+                <div class="stats-card">
+                    <h3 class="mb-0">{{ (public_docs|length + private_docs|length) }}</h3>
+                    <div>Tổng tài liệu</div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stats-card">
+                    <h3 class="mb-0">{{ public_docs|length }}</h3>
+                    <div>Tài liệu thường</div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stats-card">
+                    <h3 class="mb-0">{{ private_docs|length }}</h3>
+                    <div>Tài liệu mật</div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stats-card">
+                    <h3 class="mb-0">Admin</h3>
+                    <div>Quản trị viên</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-panel glass-card p-4">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- subjects quick links -->
+            <div class="subject-list mb-3">
+                {% set subjects = ['Toán','Lý','Hóa','Sinh','Tin','Sử','Văn','Tiếng Anh','Chung'] %}
+                {% for s in subjects %}
+                    <a href="{{ url_for('subject', name=s) }}" class="subject-link {% if current_subject == s %}active{% endif %}">{{ s }}</a>
+                {% endfor %}
+                <a href="{{ url_for('index') }}" class="subject-link {% if not current_subject %}active{% endif %}">Tất cả</a>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="m-0">Thêm tài liệu mới</h4>
+            </div>
+
+            <!-- add form -->
+            <form method="POST" class="mb-4">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">URL tài liệu</label>
+                        <input type="url" name="url" class="form-control" required placeholder="https://...">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Tiêu đề</label>
+                        <input type="text" name="title" class="form-control" required placeholder="Tên tài liệu">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Loại</label>
+                        <select name="type" class="form-select">
+                            <option value="public">Tài liệu thường</option>
+                            <option value="private">Tài liệu mật</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Chuyên mục</label>
+                        <select name="category" class="form-select cat-select" required>
+                            <option value="Toán">Toán</option>
+                            <option value="Lý">Lý</option>
+                            <option value="Hóa">Hóa</option>
+                            <option value="Sinh">Sinh</option>
+                            <option value="Tin">Tin</option>
+                            <option value="Sử">Sử</option>
+                            <option value="Văn">Văn</option>
+                            <option value="Tiếng Anh">Tiếng Anh</option>
+                            <option value="Chung" selected>Chung</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button type="submit" class="btn btn-modern w-100"><i class="bi bi-plus-circle me-2"></i>Thêm tài liệu</button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- quick filter / search for management -->
+            <div class="search-filter">
+                <input id="filterSearch" class="form-control" placeholder="Tìm trong danh sách (tiêu đề hoặc URL)..." />
+                <select id="filterCategory" class="form-select" style="max-width:220px;">
+                    <option value="all">Tất cả chuyên mục</option>
+                    <option>Toán</option><option>Lý</option><option>Hóa</option><option>Sinh</option>
+                    <option>Tin</option><option>Sử</option><option>Văn</option><option>Tiếng Anh</option>
+                </select>
+            </div>
+
+            <!-- Manage lists -->
+            <div id="manageList" class="mt-3">
+                <h5 class="mt-3">Tài liệu thường</h5>
+                {% if public_docs %}
+                    <div id="publicList">
+                        {% for doc in public_docs %}
+                        <div class="card doc-card p-2 mb-2">
+                            <div class="card-body">
+                                <div>
+                                    <h6 class="mb-0">{{ doc.title }}</h6>
+                                    <small class="text-muted">{{ doc.url }}</small>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-success">{{ doc.category|default('Chung') }}</span><br>
+                                    <small class="text-muted">{{ doc.created_at|default('—') }}</small>
+                                    <div class="mt-2">
+                                        <a href="{{ doc.url }}" target="_blank" class="btn btn-sm btn-outline-secondary me-1"><i class="bi bi-eye"></i> Xem</a>
+
+                                        <!-- Delete form -->
+                                        <form method="POST" action="{{ url_for('delete_doc', doc_id=doc.id) }}" style="display:inline-block;" onsubmit="return confirm('Bạn có chắc muốn xóa tài liệu này?');">
+                                            <button type="submit" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i> Xóa</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-4 text-muted"><i class="bi bi-inbox display-4"></i><div>Chưa có tài liệu công khai</div></div>
+                {% endif %}
+
+                <h5 class="mt-4">Tài liệu mật</h5>
+                {% if private_docs %}
+                    <div id="privateList">
+                        {% for doc in private_docs %}
+                        <div class="card doc-card p-2 mb-2">
+                            <div class="card-body">
+                                <div>
+                                    <h6 class="mb-0">{{ doc.title }}</h6>
+                                    <small class="text-muted">{{ doc.url }}</small>
+                                </div>
+                                <div class="text-end">
+                                    <span class="key-badge">Key: {{ doc.key }}</span><br>
+                                    <small class="text-muted">{{ doc.category|default('Chung') }} • {{ doc.created_at|default('—') }}</small>
+                                    <div class="mt-2">
+                                        <a href="{{ doc.url }}" target="_blank" class="btn btn-sm btn-outline-secondary me-1"><i class="bi bi-eye"></i> Xem</a>
+
+                                        <!-- Delete form for private doc -->
+                                        <form method="POST" action="{{ url_for('delete_doc', doc_id=doc.id) }}" style="display:inline-block;" onsubmit="return confirm('Bạn có chắc muốn xóa tài liệu này?');">
+                                            <button type="submit" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i> Xóa</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-4 text-muted"><i class="bi bi-shield-lock display-4"></i><div>Chưa có tài liệu mật</div></div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-center text-white mt-4 mb-4">
+        <div class="container">
+            <small>&copy; 2025 Tài liệu học tập</small>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // client side filter for admin list (no refresh)
+        const filterSearch = document.getElementById('filterSearch');
+        const filterCategory = document.getElementById('filterCategory');
+
+        function getCards(listId){
+            const container = document.getElementById(listId);
+            if(!container) return [];
+            return Array.from(container.querySelectorAll('.doc-card'));
+        }
+        const publicCards = getCards('publicList');
+        const privateCards = getCards('privateList');
+
+        function applyAdminFilter(){
+            const q = (filterSearch.value || '').toLowerCase();
+            const cat = filterCategory.value;
+            const applyTo = (cards) => {
+                cards.forEach(card =>{
+                    const title = (card.querySelector('h6')?.innerText || '').toLowerCase();
+                    const url = (card.querySelector('small')?.innerText || '').toLowerCase();
+                    const category = (card.querySelector('.badge')?.innerText || card.querySelector('.key-badge')?.nextSibling?.textContent || '').trim();
+                    const matchText = title.includes(q) || url.includes(q);
+                    const matchCat = (cat === 'all') || (category.includes(cat));
+                    card.style.display = (matchText && matchCat) ? '' : 'none';
+                })
+            };
+            applyTo(publicCards);
+            applyTo(privateCards);
+        }
+        filterSearch.addEventListener('input', applyAdminFilter);
+        filterCategory.addEventListener('change', applyAdminFilter);
+    </script>
+</body>
+</html>
