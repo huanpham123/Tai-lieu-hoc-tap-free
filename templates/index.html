@@ -1,108 +1,407 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" data-bs-theme="dark">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <title>Tài liệu học tập</title>
+    <title>Tài liệu học tập | Thư viện số</title>
 
     <!-- Bootstrap + Icons + Font -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"/>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 
     <style>
-        :root{
-            --primary:#4361ee;
-            --secondary:#3a0ca3;
-            --accent:#4cc9f0;
-            --glass: rgba(255,255,255,0.9);
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #8b5cf6;
+            --accent: #06b6d4;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark-bg: #0f172a;
+            --dark-surface: #1e293b;
+            --dark-card: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --glass: rgba(30, 41, 59, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
         }
-        body{
+
+        [data-bs-theme="dark"] {
+            --bs-body-bg: var(--dark-bg);
+            --bs-body-color: var(--text-primary);
+        }
+
+        body {
             font-family: 'Inter', sans-serif;
-            background: radial-gradient(1200px 600px at 10% 10%, rgba(76,201,240,0.12), transparent),
-                        radial-gradient(1000px 500px at 90% 90%, rgba(67,97,238,0.12), transparent),
-                        linear-gradient(135deg,#667eea 0%,#764ba2 100%);
-            min-height:100vh;
-            color:#222;
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #1e1b4b 100%);
+            min-height: 100vh;
+            color: var(--text-primary);
+            overflow-x: hidden;
         }
-        .glass-card{
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--dark-surface);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 10px;
+        }
+
+        .glass-card {
             background: var(--glass);
-            backdrop-filter: blur(8px);
-            border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.3);
-            box-shadow: 0 8px 30px rgba(31, 38, 135, 0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
-        .navbar { background: transparent; padding: 1rem 0; }
-        .navbar-brand { font-weight:700; color: white; font-size:1.35rem; }
-        .hero { margin-top: 1.5rem; padding: 2.2rem; border-radius: 18px; color: white; border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 8px 30px rgba(0,0,0,0.12); }
-        .badge-custom { background: linear-gradient(45deg,var(--primary),var(--accent)); color: white; padding: .45rem .9rem; border-radius: 30px; font-size: .9rem; display:inline-flex; align-items:center; gap:.5rem; }
+
+        .navbar {
+            background: rgba(15, 23, 42, 0.8) !important;
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .hero {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--secondary) 100%);
+            border-radius: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+
         .category-btn {
-            border-radius: 999px; padding: .45rem .9rem; margin: .25rem; color: white; text-decoration:none;
-            background: rgba(255,255,255,0.08); display:inline-block;
-            transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50px;
+            padding: 0.6rem 1.2rem;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
         }
-        .category-btn.active { transform: translateY(-6px) scale(1.03); background: linear-gradient(45deg,var(--accent),var(--primary)); box-shadow: 0 8px 20px rgba(67,97,238,0.18); color: #fff; }
-        .search-input { border-radius: 30px; padding: .6rem 1rem; border: none; box-shadow: 0 6px 18px rgba(12,12,40,0.08); width:100%; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.25rem; margin-top: 1.25rem; }
-        .doc-card { background: white; border-radius: 14px; padding: 1.25rem; transition: transform .25s, box-shadow .25s; display:flex; flex-direction:column; min-height:180px; }
-        .doc-card:hover { transform: translateY(-10px); box-shadow: 0 18px 40px rgba(40,50,120,0.12); }
-        .doc-head { display:flex; gap:.75rem; align-items:center; margin-bottom:.6rem; }
-        .doc-icon { width:52px; height:52px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.6rem; background: linear-gradient(135deg,#eef2ff,#dde7ff); color: var(--primary); flex-shrink:0; }
-        .doc-title { font-weight:700; font-size:1.05rem; margin:0; }
-        .doc-meta { color: #6b7280; font-size:.9rem; margin-top:.45rem; margin-bottom:.8rem; }
-        .doc-actions { margin-top:auto; display:flex; gap:.6rem; }
-        .btn-modern { background: linear-gradient(45deg,var(--primary),var(--secondary)); border:none; color:white; padding:.55rem .9rem; border-radius:10px; display:inline-flex; align-items:center; gap:.5rem; }
-        .btn-outline-modern { border:1px solid rgba(67,97,238,0.12); background:transparent; color:#333; padding:.5rem .9rem; border-radius:10px; }
-        .cat-badge { padding:.25rem .6rem; border-radius:999px; font-size:.78rem; font-weight:600; background: linear-gradient(90deg, rgba(67,97,238,0.12), rgba(76,201,240,0.08)); color: #24303f; }
-        .empty-state { text-align:center; color: rgba(255,255,255,0.9); padding: 3rem 0; }
-        .modal-content { border-radius: 14px; }
-        @media (max-width:576px){ .hero { padding:1.2rem; } .navbar-brand { font-size:1.1rem; } }
+
+        .category-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .category-btn:hover::before {
+            left: 100%;
+        }
+
+        .category-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+        }
+
+        .category-btn.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-color: transparent;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+        }
+
+        .search-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50px;
+            color: var(--text-primary);
+            padding: 0.75rem 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+            color: var(--text-primary);
+        }
+
+        .search-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .doc-card {
+            background: var(--dark-card);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .doc-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .doc-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .doc-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .doc-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .btn-modern {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 12px;
+            padding: 0.75rem 1.5rem;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-modern::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-modern:hover::before {
+            left: 100%;
+        }
+
+        .btn-modern:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-outline-modern {
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            padding: 0.75rem 1.5rem;
+            color: var(--primary);
+            background: transparent;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-modern:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+        }
+
+        .cat-badge {
+            background: linear-gradient(135deg, var(--accent), var(--primary));
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .stats-card {
+            background: linear-gradient(135deg, var(--dark-surface), var(--dark-card));
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .floating-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 1000;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(99, 102, 241, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.8s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-content {
+            background: var(--dark-surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            backdrop-filter: blur(20px);
+        }
+
+        .form-control, .form-select {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: var(--text-primary);
+            padding: 0.75rem 1rem;
+        }
+
+        .form-control:focus, .form-select:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+            color: var(--text-primary);
+        }
+
+        .alert {
+            border: none;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .hero {
+                padding: 1.5rem !important;
+            }
+            
+            .floating-btn {
+                bottom: 1rem;
+                right: 1rem;
+            }
+        }
     </style>
 </head>
 <body>
-    <!-- NAV -->
-    <nav class="navbar navbar-expand-lg">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
         <div class="container">
-            <a class="navbar-brand" href="/">
-                <i class="bi bi-journal-bookmark-fill me-2"></i> Tài liệu học tập
+            <a class="navbar-brand fw-bold d-flex align-items-center" href="/">
+                <i class="bi bi-journal-bookmark-fill me-2" style="color: var(--accent);"></i>
+                <span class="gradient-text">Tài liệu học tập</span>
             </a>
 
-            <div class="d-flex align-items-center ms-auto gap-2">
+            <div class="d-flex align-items-center gap-3">
                 {% if not session.logged_in %}
-                <button class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#loginModal">
-                    <i class="bi bi-key me-1"></i> Đăng nhập Admin
+                <button class="btn btn-outline-light btn-modern" data-bs-toggle="modal" data-bs-target="#loginModal">
+                    <i class="bi bi-key me-2"></i>Đăng nhập
                 </button>
                 {% else %}
-                <div class="d-flex align-items-center text-white me-2">
-                    <i class="bi bi-person-circle me-2"></i> Team_Kn1
+                <div class="d-flex align-items-center text-white me-3">
+                    <i class="bi bi-person-circle me-2" style="color: var(--accent);"></i>
+                    <span>Team_Kn1</span>
                 </div>
-                <a href="/admin" class="btn btn-light me-2">
-                    <i class="bi bi-speedometer2 me-1"></i> Quản lý
+                <a href="/admin" class="btn btn-modern me-2">
+                    <i class="bi bi-speedometer2 me-2"></i>Quản lý
                 </a>
-                <a href="/logout" class="btn btn-outline-light">
-                    <i class="bi bi-box-arrow-right me-1"></i> Đăng xuất
+                <a href="/logout" class="btn btn-outline-modern">
+                    <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
                 </a>
                 {% endif %}
             </div>
         </div>
     </nav>
 
-    <!-- Login modal -->
-    <div class="modal fade" id="loginModal" tabindex="-1">
+    <!-- Login Modal -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content glass-card p-3">
-                <div class="modal-header border-0">
-                    <h5 class="modal-title">Đăng nhập Admin</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-content glass-card p-4">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold">Đăng nhập Admin</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <form method="POST" action="/login">
-                        <div class="mb-3">
-                            <label class="form-label">Mật khẩu:</label>
-                            <input type="password" class="form-control" name="password" required placeholder="Nhập mật khẩu admin">
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Mật khẩu:</label>
+                            <input type="password" class="form-control" name="password" required 
+                                   placeholder="Nhập mật khẩu admin" autocomplete="current-password">
                         </div>
                         <button type="submit" class="btn btn-modern w-100">
-                            <i class="bi bi-key me-1"></i> Đăng nhập
+                            <i class="bi bi-key me-2"></i> Đăng nhập
                         </button>
                     </form>
                 </div>
@@ -110,119 +409,171 @@
         </div>
     </div>
 
-    <!-- MAIN -->
-    <div class="container my-4">
-        <div class="hero glass-card p-4">
-            <div class="d-flex flex-column flex-md-row align-items-start gap-3">
-                <div class="flex-fill">
-                    <h1 class="display-6 fw-bold mb-1">Tổng hợp tài liệu học tập</h1>
-                    <p class="mb-2">Chọn chuyên mục hoặc tìm kiếm để lọc nhanh tài liệu.</p>
-
-                    <div class="d-flex flex-wrap align-items-center gap-2">
-                        <span class="badge-custom"><i class="bi bi-file-earmark-text"></i> {{ public_docs|length }} công khai</span>
-                        <span class="badge-custom"><i class="bi bi-lock"></i> {{ private_docs|length }} mật</span>
+    <!-- Main Content -->
+    <div class="container my-5">
+        <!-- Hero Section -->
+        <div class="hero glass-card p-5 mb-5 fade-in" data-aos="fade-up">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <h1 class="display-5 fw-bold mb-3">Thư viện tài liệu học tập</h1>
+                    <p class="lead mb-4 opacity-75">Tổng hợp tài liệu chất lượng cao cho mọi môn học. Tìm kiếm và truy cập nhanh chóng.</p>
+                    
+                    <div class="d-flex flex-wrap align-items-center gap-3 mb-4">
+                        <span class="badge bg-success bg-opacity-20 text-success border border-success border-opacity-25 px-3 py-2">
+                            <i class="bi bi-file-earmark-text me-2"></i>{{ public_docs|length }} công khai
+                        </span>
+                        <span class="badge bg-warning bg-opacity-20 text-warning border border-warning border-opacity-25 px-3 py-2">
+                            <i class="bi bi-lock me-2"></i>{{ private_docs|length }} mật
+                        </span>
                     </div>
                 </div>
-
-                <div style="min-width:280px;">
-                    <input id="searchInput" class="search-input" placeholder="Tìm theo tiêu đề (ví dụ: Đại số)...">
+                <div class="col-lg-4">
+                    <div class="position-relative">
+                        <input id="searchInput" class="search-input w-100" 
+                               placeholder="🔍 Tìm kiếm tài liệu...">
+                        <div class="position-absolute top-50 end-0 translate-middle-y me-3">
+                            <i class="bi bi-search text-secondary"></i>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- categories nav (link to subject pages) -->
-            <div class="mt-3">
-                {% set categories = ['Tất cả','Toán','Lý','Hóa','Sinh','Tin','Sử','Văn','Tiếng Anh'] %}
-                <div id="categories" class="mt-2">
+            <!-- Categories -->
+            <div class="mt-4">
+                <h6 class="text-white-50 mb-3 fw-semibold">Lọc theo môn học:</h6>
+                <div id="categories" class="d-flex flex-wrap gap-2">
+                    {% set categories = ['Tất cả','Toán','Lý','Hóa','Sinh','Tin','Sử','Văn','Tiếng Anh'] %}
                     {% for c in categories %}
                         {% if c == 'Tất cả' %}
-                            <a href="{{ url_for('index') }}" class="category-btn {% if not current_subject or current_subject == 'Tất cả' %}active{% endif %}" data-cat="{{ c }}">{{ c }}</a>
+                            <a href="{{ url_for('index') }}" 
+                               class="category-btn {% if not current_subject or current_subject == 'Tất cả' %}active{% endif %}" 
+                               data-cat="{{ c }}">
+                                {{ c }}
+                            </a>
                         {% else %}
-                            <a href="{{ url_for('subject', name=c) }}" class="category-btn {% if current_subject == c %}active{% endif %}" data-cat="{{ c }}">{{ c }}</a>
+                            <a href="{{ url_for('subject', name=c) }}" 
+                               class="category-btn {% if current_subject == c %}active{% endif %}" 
+                               data-cat="{{ c }}">
+                                {{ c }}
+                            </a>
                         {% endif %}
                     {% endfor %}
                 </div>
             </div>
         </div>
 
-        <!-- Flash -->
+        <!-- Flash Messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
-                <div class="mt-3">
+                <div class="mb-4">
                 {% for category, message in messages %}
-                    <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show glass-card">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show glass-card"
+                         data-aos="fade-down">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-{{ 'exclamation-triangle' if category == 'error' else 'check-circle' }}-fill me-3"></i>
+                            <span>{{ message }}</span>
+                        </div>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
                     </div>
                 {% endfor %}
                 </div>
             {% endif %}
         {% endwith %}
 
-        <!-- Documents grid -->
-        <h3 class="text-white mt-4 mb-3 section-title">Tài liệu</h3>
+        <!-- Documents Grid -->
+        <h3 class="mb-4 fw-bold section-title" data-aos="fade-up">Tài liệu học tập</h3>
 
         <div id="docsGrid" class="grid">
             {% for doc in public_docs %}
-            <article class="doc-card" data-title="{{ doc.title|lower }}" data-cat="{{ doc.category|default('Chung') }}">
-                <div class="doc-head">
-                    <div class="doc-icon"><i class="bi bi-file-earmark-text"></i></div>
-                    <div class="flex-fill text-start">
-                        <h4 class="doc-title">{{ doc.title }}</h4>
-                        <div class="doc-meta">
+            <div class="doc-card glass-card p-4 fade-in" data-aos="zoom-in" 
+                 data-title="{{ doc.title|lower }}" data-cat="{{ doc.category|default('Chung') }}">
+                <div class="doc-head d-flex align-items-start gap-3 mb-3">
+                    <div class="doc-icon">
+                        <i class="bi bi-file-earmark-text"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h5 class="doc-title fw-bold mb-2">{{ doc.title }}</h5>
+                        <div class="doc-meta d-flex align-items-center gap-2 flex-wrap">
                             <span class="cat-badge">{{ doc.category|default('Chung') }}</span>
-                            &nbsp;&middot;&nbsp;
-                            <small>{{ doc.created_at|default('—') }}</small>
+                            <small class="text-muted">{{ doc.created_at|default('—') }}</small>
                         </div>
                     </div>
                 </div>
 
-                <p class="text-muted small mb-3">{{ doc.url }}</p>
+                {% if doc.description %}
+                <p class="text-muted mb-3">{{ doc.description }}</p>
+                {% endif %}
 
-                <div class="doc-actions">
-                    <a class="btn-modern" href="{{ doc.url }}" target="_blank"><i class="bi bi-eye"></i> Xem</a>
-                    <button class="btn-outline-modern" onclick="copyLink('{{ doc.url }}')"><i class="bi bi-clipboard"></i> Sao chép</button>
-                    <a class="btn-outline-modern" href="?q={{ doc.title }}" style="margin-left:auto"><i class="bi bi-search"></i> Tìm</a>
+                <div class="doc-actions d-flex gap-2 flex-wrap">
+                    <a class="btn btn-modern flex-grow-1" href="{{ doc.url }}" target="_blank">
+                        <i class="bi bi-eye me-2"></i>Xem tài liệu
+                    </a>
+                    <button class="btn btn-outline-modern" onclick="copyToClipboard('{{ doc.url }}')">
+                        <i class="bi bi-clipboard me-2"></i>Sao chép
+                    </button>
                 </div>
-            </article>
+            </div>
             {% endfor %}
 
-            <!-- private docs shown as locked cards -->
+            <!-- Private Documents -->
             {% for doc in private_docs %}
-            <article class="doc-card" data-title="{{ doc.title|lower }}" data-cat="{{ doc.category|default('Chung') }}">
-                <div class="doc-head">
-                    <div class="doc-icon"><i class="bi bi-lock-fill"></i></div>
-                    <div class="flex-fill text-start">
-                        <h4 class="doc-title">{{ doc.title }}</h4>
-                        <div class="doc-meta">
+            <div class="doc-card glass-card p-4 fade-in" data-aos="zoom-in"
+                 data-title="{{ doc.title|lower }}" data-cat="{{ doc.category|default('Chung') }}">
+                <div class="doc-head d-flex align-items-start gap-3 mb-3">
+                    <div class="doc-icon" style="background: linear-gradient(135deg, var(--warning), var(--danger));">
+                        <i class="bi bi-lock-fill"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h5 class="doc-title fw-bold mb-2">{{ doc.title }}</h5>
+                        <div class="doc-meta d-flex align-items-center gap-2 flex-wrap">
                             <span class="cat-badge">{{ doc.category|default('Chung') }}</span>
-                            &nbsp;&middot;&nbsp;
-                            <small>{{ doc.created_at|default('—') }}</small>
+                            <small class="text-muted">{{ doc.created_at|default('—') }}</small>
                         </div>
                     </div>
                 </div>
 
-                <p class="text-muted small mb-3">Tài liệu mật — yêu cầu key để truy cập</p>
+                {% if doc.description %}
+                <p class="text-muted mb-3">{{ doc.description }}</p>
+                {% endif %}
 
-                <div class="doc-actions">
-                    <button class="btn-modern" data-bs-toggle="modal" data-bs-target="#keyModal{{ doc.id }}"><i class="bi bi-key"></i> Nhập Key</button>
-                    <button class="btn-outline-modern" onclick="copyKeyFromBadge('{{ doc.key|default('') }}')"><i class="bi bi-clipboard"></i> Sao chép key (admin)</button>
+                <p class="text-warning small mb-3">
+                    <i class="bi bi-shield-lock me-1"></i>Tài liệu được bảo vệ - yêu cầu key để truy cập
+                </p>
+
+                <div class="doc-actions d-flex gap-2 flex-wrap">
+                    <button class="btn btn-modern flex-grow-1" data-bs-toggle="modal" 
+                            data-bs-target="#keyModal{{ doc.id }}">
+                        <i class="bi bi-key me-2"></i>Nhập Key
+                    </button>
+                    {% if session.logged_in %}
+                    <button class="btn btn-outline-modern" onclick="copyToClipboard('{{ doc.key|default('') }}')">
+                        <i class="bi bi-clipboard me-2"></i>Copy Key
+                    </button>
+                    {% endif %}
                 </div>
-            </article>
+            </div>
 
-            <!-- key modal -->
+            <!-- Key Modal for Private Doc -->
             <div class="modal fade" id="keyModal{{ doc.id }}" tabindex="-1">
                 <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content glass-card p-3">
+                    <div class="modal-content glass-card p-4">
                         <div class="modal-header border-0">
-                            <h5 class="modal-title">Nhập Key - {{ doc.title }}</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            <h5 class="modal-title fw-bold">
+                                <i class="bi bi-key me-2"></i>Truy cập tài liệu
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                         </div>
                         <div class="modal-body">
+                            <p class="text-muted mb-3">Nhập key để truy cập tài liệu: <strong>{{ doc.title }}</strong></p>
                             <form method="POST" action="/access_private/{{ doc.id }}">
                                 <div class="mb-3">
-                                    <input name="key" class="form-control key-input" placeholder="Nhập key (kn1-...)" required>
+                                    <input name="key" class="form-control key-input" 
+                                           placeholder="Nhập key (kn1-...)" required
+                                           autocomplete="off">
                                 </div>
-                                <button class="btn btn-modern w-100"><i class="bi bi-unlock"></i> Truy cập</button>
+                                <button class="btn btn-modern w-100">
+                                    <i class="bi bi-unlock me-2"></i> Truy cập
+                                </button>
                             </form>
                         </div>
                     </div>
@@ -231,52 +582,127 @@
             {% endfor %}
 
             {% if (public_docs|length + private_docs|length) == 0 %}
-                <div class="empty-state col-12">
-                    <i class="bi bi-inbox display-1 text-white opacity-50"></i>
-                    <h3 class="text-white mt-3">Chưa có tài liệu nào</h3>
-                    <p class="text-white-50">Admin sẽ thêm tài liệu sớm.</p>
+            <div class="col-12">
+                <div class="empty-state glass-card" data-aos="fade-up">
+                    <i class="bi bi-inbox display-1"></i>
+                    <h4 class="mt-3 mb-2">Chưa có tài liệu nào</h4>
+                    <p class="text-muted">Quản trị viên sẽ thêm tài liệu sớm nhất.</p>
                 </div>
+            </div>
             {% endif %}
         </div>
     </div>
 
-    <!-- floating admin -->
+    <!-- Floating Admin Button -->
     {% if session.logged_in %}
-    <a href="/admin" class="btn btn-modern" style="position:fixed; right:1.4rem; bottom:1.4rem; border-radius: 12px; padding:.7rem 1rem;">
-        <i class="bi bi-speedometer2 me-2"></i> Quản lý
+    <a href="/admin" class="floating-btn btn btn-modern pulse" data-aos="zoom-in" data-aos-delay="1000">
+        <i class="bi bi-speedometer2 me-2"></i>Quản lý
     </a>
     {% endif %}
 
-    <footer class="text-center text-white mt-5 py-4">
+    <!-- Footer -->
+    <footer class="text-center text-white-50 mt-5 py-4">
         <div class="container">
-            <p>&copy; Edit by huankn1</p>
+            <p>Thư viện tài liệu học tập. Edit by huankn1</p>
         </div>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
-        // Client searching (works together with server-side category pages)
+        // Initialize AOS
+        AOS.init({
+            duration: 800,
+            once: true,
+            offset: 100
+        });
+
+        // Search functionality
         const docs = Array.from(document.querySelectorAll('#docsGrid .doc-card'));
         const searchInput = document.getElementById('searchInput');
 
         function applyFilter() {
-            const q = (searchInput.value || '').trim().toLowerCase();
+            const query = (searchInput.value || '').trim().toLowerCase();
+            let hasVisible = false;
+            
             docs.forEach(card => {
                 const title = card.dataset.title || '';
-                const match = title.includes(q);
-                card.style.display = match ? '' : 'none';
+                const category = card.dataset.cat || '';
+                const matches = title.includes(query) || category.includes(query);
+                
+                if (matches) {
+                    card.style.display = '';
+                    hasVisible = true;
+                } else {
+                    card.style.display = 'none';
+                }
             });
+
+            // Show empty state if no results
+            const emptyState = document.querySelector('.empty-state');
+            if (emptyState) {
+                emptyState.style.display = hasVisible ? 'none' : '';
+            }
         }
 
         searchInput.addEventListener('input', applyFilter);
 
-        function copyLink(url){
-            navigator.clipboard?.writeText(url).then(()=> alert('Đã sao chép link vào clipboard')).catch(()=> alert('Không thể sao chép'));
+        // Copy to clipboard function
+        async function copyToClipboard(text) {
+            try {
+                await navigator.clipboard.writeText(text);
+                showToast('Đã sao chép vào clipboard!', 'success');
+            } catch (err) {
+                showToast('Không thể sao chép', 'error');
+            }
         }
-        function copyKeyFromBadge(key){
-            if(!key){ alert('Không có key hiển thị (chỉ admin mới thấy khi xem quản lý).'); return; }
-            navigator.clipboard?.writeText(key).then(()=> alert('Đã sao chép key'));
+
+        // Toast notification
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `alert alert-${type} position-fixed glass-card`;
+            toast.style.cssText = `
+                top: 20px;
+                right: 20px;
+                z-index: 9999;
+                min-width: 300px;
+                animation: slideInRight 0.3s ease;
+            `;
+            toast.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}-fill me-2"></i>
+                    ${message}
+                </div>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideOutRight 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
         }
+
+        // Add CSS for animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideInRight {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOutRight {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+            .gradient-text {
+                background: linear-gradient(135deg, var(--primary), var(--accent));
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 </html>
