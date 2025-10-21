@@ -1,14 +1,8 @@
 {
-  "builds": [
-    {
-      "src": "app.py",
-      "use": "vercel-python@3.12"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "app.py"
-    }
+  "functions": {
+    "api/index.py": { "runtime": "python3.11" }
+  },
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/api/index" }
   ]
 }
