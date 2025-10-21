@@ -5,7 +5,16 @@ import requests
 import json
 import os
 
-app = Flask(__name__, template_folder="templates")
+# Fix for Vercel deployment
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+# Adjust template path for Vercel
+current_dir = os.path.dirname(os.path.abspath(__file__))
+templates_path = os.path.join(current_dir, '..', 'templates')
+
+app = Flask(__name__, template_folder=templates_path)
 app.secret_key = os.environ.get('SECRET_KEY', 'your_secret_key_here_change_in_production')
 
 # JSONBin configuration (optional - set these environment vars on Vercel)
@@ -15,11 +24,16 @@ JSONBIN_BASE = "https://api.jsonbin.io/v3/b"
 REQUESTS_TIMEOUT = 6  # seconds
 
 # Local fallback for development or if JSONBin not usable
-FALLBACK_FILE = "fallback_data.json"
-LOCAL_BIN_ID_STORE = "local_created_bin_id.txt"
+# Use absolute paths for Vercel
+FALLBACK_FILE = os.path.join(current_dir, "fallback_data.json")
+LOCAL_BIN_ID_STORE = os.path.join(current_dir, "local_created_bin_id.txt")
 
 # Subjects list (menu)
 SUBJECTS = ['Toán', 'Lý', 'Hóa', 'Sinh', 'Tin', 'Sử', 'Văn', 'Tiếng Anh', 'Chung']
+
+# ---------- Memory storage for Vercel (read-only filesystem) ----------
+memory_storage = {"public": [], "private": []}
+memory_bin_id = None
 
 # ---------- Helpers for JSON shape ----------
 def normalize_data(raw):
@@ -51,23 +65,15 @@ def normalize_data(raw):
 
 # ---------- Local fallback I/O ----------
 def use_local_fallback_read():
-    if not os.path.exists(FALLBACK_FILE):
-        return {"public": [], "private": []}
-    try:
-        with open(FALLBACK_FILE, 'r', encoding='utf-8') as f:
-            return normalize_data(json.load(f))
-    except Exception as e:
-        print("Fallback read error:", e)
-        return {"public": [], "private": []}
+    """Read from memory storage for Vercel compatibility"""
+    global memory_storage
+    return memory_storage
 
 def use_local_fallback_write(data):
-    try:
-        with open(FALLBACK_FILE, 'w', encoding='utf-8') as f:
-            json.dump(normalize_data(data), f, ensure_ascii=False, indent=2)
-        return True
-    except Exception as e:
-        print("Fallback write error:", e)
-        return False
+    """Write to memory storage for Vercel compatibility"""
+    global memory_storage
+    memory_storage = normalize_data(data)
+    return True
 
 # ---------- JSONBin helpers ----------
 def create_bin_on_jsonbin(initial_payload=None, private=True, bin_name="app_urls"):
@@ -90,11 +96,9 @@ def create_bin_on_jsonbin(initial_payload=None, private=True, bin_name="app_urls
             meta = j.get("metadata", {})
             new_id = meta.get("id")
             if new_id:
-                try:
-                    with open(LOCAL_BIN_ID_STORE, 'w', encoding='utf-8') as f:
-                        f.write(new_id)
-                except Exception:
-                    pass
+                # Store in memory for Vercel
+                global memory_bin_id
+                memory_bin_id = new_id
                 return new_id
         else:
             print("Create bin failed:", resp.status_code, resp.text)
@@ -106,14 +110,10 @@ def create_bin_on_jsonbin(initial_payload=None, private=True, bin_name="app_urls
 def get_effective_bin_id():
     if JSONBIN_BIN_ID:
         return JSONBIN_BIN_ID
-    if os.path.exists(LOCAL_BIN_ID_STORE):
-        try:
-            with open(LOCAL_BIN_ID_STORE, 'r', encoding='utf-8') as f:
-                v = f.read().strip()
-                if v:
-                    return v
-        except Exception:
-            pass
+    # Check memory first
+    global memory_bin_id
+    if memory_bin_id:
+        return memory_bin_id
     return None
 
 def load_urls_from_jsonbin(bin_id):
@@ -178,7 +178,7 @@ def load_urls():
                 if data2 is not None:
                     return data2
             print("JSONBin: no bin id and could not create one.")
-    # fallback local
+    # fallback to memory storage (Vercel compatible)
     return use_local_fallback_read()
 
 def save_urls(data):
@@ -201,7 +201,7 @@ def save_urls(data):
                         if ok2:
                             return True
                 print("JSONBin save error:", msg)
-    # fallback to local
+    # fallback to memory storage (Vercel compatible)
     return use_local_fallback_write(data)
 
 # ---------- Utility ----------
@@ -333,4 +333,3 @@ if __name__ == '__main__':
 else:
     # For Vercel deployment
     application = app
-    
