@@ -1,63 +1,63 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 import secrets
 from datetime import datetime
 import requests
 import json
 import os
 
-# Fix for Vercel deployment
 current_dir = os.path.dirname(os.path.abspath(__file__))
 templates_path = os.path.join(current_dir, '..', 'templates')
 
 app = Flask(__name__, template_folder=templates_path)
 app.secret_key = 'your_fixed_secret_key_for_vercel_deployment_2024'
 
-# JSONBin configuration - using direct values instead of environment variables
-JSONBIN_API_KEY = None  # Set to None to use memory storage
-JSONBIN_BIN_ID = None   # Set to None to use memory storage  
-JSONBIN_BASE = "https://api.jsonbin.io/v3/b"
-REQUESTS_TIMEOUT = 10  # seconds
-
-# Subjects list (menu)
+# Configuration
 SUBJECTS = ['Toán', 'Lý', 'Hóa', 'Sinh', 'Tin', 'Sử', 'Văn', 'Tiếng Anh', 'Chung']
 
-# ---------- Memory storage for Vercel (primary storage) ----------
+# Memory storage
 memory_storage = {"public": [], "private": []}
-memory_bin_id = None
 
-# ---------- Sample initial data ----------
+# Sample data
 SAMPLE_DATA = {
     "public": [
         {
             "id": "sample1",
-            "title": "Toán 12 - Bài giảng hay",
+            "title": "Toán 12 - Bài giảng đại số",
             "url": "https://example.com/toan12",
             "category": "Toán",
-            "created_at": "01/01/2024 10:00"
+            "created_at": "01/01/2024 10:00",
+            "description": "Bài giảng đại số nâng cao lớp 12"
         },
         {
             "id": "sample2", 
-            "title": "Vật lý cơ bản",
+            "title": "Vật lý cơ bản - Chương 1",
             "url": "https://example.com/vatly",
             "category": "Lý",
-            "created_at": "01/01/2024 10:00"
+            "created_at": "01/01/2024 10:00",
+            "description": "Kiến thức vật lý cơ bản chương 1"
+        },
+        {
+            "id": "sample3",
+            "title": "Hóa học hữu cơ",
+            "url": "https://example.com/hoahoc",
+            "category": "Hóa", 
+            "created_at": "01/01/2024 10:00",
+            "description": "Chuyên đề hóa học hữu cơ 11"
         }
     ],
     "private": []
 }
 
-# ---------- Helpers for JSON shape ----------
 def normalize_data(raw):
-    """Normalize various shapes into dict with 'public' and 'private' lists."""
     if raw is None:
         return {"public": [], "private": []}
-
+    
     if isinstance(raw, dict) and 'record' in raw:
         raw = raw['record']
-
+        
     if isinstance(raw, list):
         return {"public": raw, "private": []}
-
+        
     if isinstance(raw, dict):
         public = raw.get('public', [])
         private = raw.get('private', [])
@@ -65,61 +65,36 @@ def normalize_data(raw):
             public = []
         if not isinstance(private, list):
             private = []
-        # ensure each doc has category
         for doc in public + private:
             if 'category' not in doc:
                 doc['category'] = 'Chung'
+            if 'description' not in doc:
+                doc['description'] = ''
         return {"public": public, "private": []}
-
+        
     return {"public": [], "private": []}
 
-# ---------- Memory storage functions ----------
 def use_memory_storage_read():
-    """Read from memory storage"""
     global memory_storage
-    # Initialize with sample data if empty
     if not memory_storage["public"] and not memory_storage["private"]:
         memory_storage = SAMPLE_DATA.copy()
     return memory_storage
 
 def use_memory_storage_write(data):
-    """Write to memory storage"""
     global memory_storage
     memory_storage = normalize_data(data)
     return True
 
-# ---------- JSONBin helpers (kept for reference but disabled) ----------
-def create_bin_on_jsonbin(initial_payload=None, private=True, bin_name="app_urls"):
-    """JSONBin disabled - using memory storage only"""
-    return None
-
-def get_effective_bin_id():
-    """JSONBin disabled - using memory storage only"""
-    return None
-
-def load_urls_from_jsonbin(bin_id):
-    """JSONBin disabled - using memory storage only"""
-    return None, "jsonbin_disabled"
-
-def save_urls_to_jsonbin(bin_id, data):
-    """JSONBin disabled - using memory storage only"""
-    return False, "jsonbin_disabled"
-
-# ---------- High-level load/save ----------
 def load_urls():
-    """Load URLs from memory storage"""
     return use_memory_storage_read()
 
 def save_urls(data):
-    """Save URLs to memory storage"""
     return use_memory_storage_write(data)
 
-# ---------- Utility ----------
 def generate_secure_key():
     return "kn1-" + secrets.token_hex(8)
 
 def find_and_remove_doc(data, doc_id):
-    """Remove document with id from data dict. Returns True if removed."""
     for bucket in ('public', 'private'):
         lst = data.get(bucket, [])
         for i, doc in enumerate(lst):
@@ -128,11 +103,10 @@ def find_and_remove_doc(data, doc_id):
                 return True
     return False
 
-# ---------- Routes ----------
+# Routes
 @app.route('/')
 def index():
     data = load_urls()
-    # show all by default
     all_public = data.get('public', [])
     all_private = data.get('private', [])
     return render_template('index.html', 
@@ -157,7 +131,6 @@ def subject(name):
 @app.route('/login', methods=['POST'])
 def login():
     password = request.form.get('password')
-    # Fixed password for demo
     if password == 'huankk123@@':
         session['logged_in'] = True
         session['admin'] = True
@@ -176,11 +149,12 @@ def admin():
     data = load_urls()
 
     if request.method == 'POST':
-        # add new doc
         url = (request.form.get('url') or '').strip()
         title = (request.form.get('title') or '').strip()
+        description = (request.form.get('description') or '').strip()
         doc_type = request.form.get('type', 'public')
         category = request.form.get('category') or 'Chung'
+        
         if category not in SUBJECTS:
             category = 'Chung'
 
@@ -191,6 +165,7 @@ def admin():
                 'id': secrets.token_hex(8),
                 'title': title,
                 'url': url,
+                'description': description,
                 'category': category,
                 'created_at': datetime.now().strftime("%d/%m/%Y %H:%M")
             }
@@ -204,7 +179,6 @@ def admin():
                 flash('Thêm tài liệu thành công!', 'success')
             else:
                 flash('Lỗi khi lưu dữ liệu!', 'error')
-            # reload to reflect saved state
             data = load_urls()
 
     return render_template('admin.html', 
@@ -215,20 +189,18 @@ def admin():
 @app.route('/delete/<doc_id>', methods=['POST'])
 def delete_doc(doc_id):
     if not session.get('logged_in'):
-        flash('Không có quyền', 'error')
-        return redirect(url_for('index'))
+        return jsonify({'success': False, 'message': 'Không có quyền'}), 403
     
     data = load_urls()
     removed = find_and_remove_doc(data, doc_id)
     if removed:
         ok = save_urls(data)
         if ok:
-            flash('Xóa tài liệu thành công', 'success')
+            return jsonify({'success': True, 'message': 'Xóa tài liệu thành công'})
         else:
-            flash('Xóa trên bộ nhớ không thành công (lỗi lưu)', 'error')
+            return jsonify({'success': False, 'message': 'Lỗi khi lưu dữ liệu'}), 500
     else:
-        flash('Không tìm thấy tài liệu', 'error')
-    return redirect(url_for('admin'))
+        return jsonify({'success': False, 'message': 'Không tìm thấy tài liệu'}), 404
 
 @app.route('/access_private/<doc_id>', methods=['POST'])
 def access_private(doc_id):
@@ -254,26 +226,20 @@ def logout():
 
 @app.route('/reset', methods=['POST'])
 def reset_data():
-    """Reset data to sample data (admin only)"""
     if not session.get('logged_in'):
-        flash('Không có quyền', 'error')
-        return redirect(url_for('index'))
+        return jsonify({'success': False, 'message': 'Không có quyền'}), 403
     
     global memory_storage
     memory_storage = SAMPLE_DATA.copy()
-    flash('Đã reset dữ liệu về mẫu!', 'success')
-    return redirect(url_for('admin'))
+    return jsonify({'success': True, 'message': 'Đã reset dữ liệu về mẫu!'})
 
 @app.route('/health')
 def health_check():
-    """Health check endpoint for Vercel"""
     return {'status': 'healthy', 'message': 'Flask app is running on Vercel'}
 
-# ---------- Run ----------
 # Vercel requirement
 application = app
 
 if __name__ == '__main__':
-    # Initialize with sample data
     use_memory_storage_write(SAMPLE_DATA)
     app.run(debug=True)
