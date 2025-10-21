@@ -1,9 +1,4 @@
-# api/index.py
-"""
-Flask app (Neon connection string embedded).
-ĐÃ CHÈN trực tiếp connection string bạn cung cấp.
-=> KEEP THIS FILE PRIVATE.
-"""
+
 
 import os
 import secrets
@@ -301,3 +296,4 @@ if __name__ == "__main__":
         db.create_all()
         seed_sample_data_if_empty()
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)
+
